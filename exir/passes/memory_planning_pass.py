@@ -345,6 +345,13 @@ class MemoryPlanningPass(PassBase):
 
     def run_multimethod(self):
         """Resolve any memory planning done across entry points, called after run is called on all entry points."""
+        try:
+            self._share_mutable_buffers()
+        finally:
+            # The pass may plan another program next.
+            self.state = _MemoryPlanningState()
+
+    def _share_mutable_buffers(self) -> None:
         if self.share_mutable_buffers:
             arena: int = 0
 
