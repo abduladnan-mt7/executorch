@@ -1954,7 +1954,8 @@ class EdgeProgramManager:
                 memory_planning_pass = config.memory_planning_pass
             # Non-strict export keeps every buffer as an input of every method.
             # A method that never uses one would store initial data for it,
-            # which can differ from the data of the methods that do.
+            # which can differ from the data of the methods that do, and get
+            # shared device memory it never touches.
             if getattr(memory_planning_pass, "share_mutable_buffers", False):
                 _remove_unused_buffers(program, shared)
             gm, new_signature = insert_write_back_for_buffers_pass(program)

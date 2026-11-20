@@ -14,6 +14,7 @@ from typing import Any, Dict, List, Type
 
 import torch
 from executorch.exir import EdgeCompileConfig, ExecutorchBackendConfig, to_edge
+from executorch.exir.backend.test.device_util import BuffersOnDevicePlanningPass
 from executorch.exir.capture._capture import patch_forward
 from executorch.exir.passes import MemoryPlanningPass
 from executorch.exir.passes.init_mutable_pass import InitializedMutableBufferPass
@@ -325,6 +326,15 @@ class ModuleSharedStateInitialized(ModuleSharedState):
 
     def get_initialized_mutable_buffers(self) -> List[str]:
         return ["state"]
+
+
+class ModuleSharedStateWithDevice(ModuleSharedStateInitialized):
+    """ModuleSharedStateInitialized with its state planned in cuda:0 memory. Its
+    ops run on the host and reach the state through copies across the device
+    boundary."""
+
+    def get_memory_planning_pass(self) -> MemoryPlanningPass:
+        return BuffersOnDevicePlanningPass({"state"}, share_mutable_buffers=True)
 
 
 class _SharingPassWithoutMarker(MemoryPlanningPass):
