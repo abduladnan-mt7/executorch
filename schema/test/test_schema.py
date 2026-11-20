@@ -94,6 +94,18 @@ class TestSchema(unittest.TestCase):
             "exir/version.py",
             r"EXECUTORCH_SCHEMA_VERSION\s*=\s*(\d+)",
         )
+        # The exporter stamps each file with the version of what it uses, one of
+        # the versions in exir/version.py.
+        with open(prefix + "exir/version.py") as f:
+            stamped = re.findall(
+                r"^\w+_VERSION\s*(?::\s*\w+\s*)?=\s*(\d+)", f.read(), re.MULTILINE
+            )
+        self.assertEqual(
+            pte_writer,
+            max(int(version) for version in stamped),
+            "EXECUTORCH_SCHEMA_VERSION must be the highest version in "
+            "exir/version.py.",
+        )
         pte_reader = read_constant(
             "runtime/executor/program.h",
             r"kMaxSupportedSchemaVersion\s*=\s*(\d+)",
